@@ -1,10 +1,10 @@
 import { useState } from 'react'
 import { usePda, factionClass, factionLabel, rankLabel, Faction } from '../store/pda'
 
-const FACTIONS: ('all' | Faction)[] = ['all','loner','duty','freedom','bandit','mercs','military','ecologist','monolith','clear-sky']
+const FACTIONS: ('all' | Faction)[] = ['all','loner','duty','freedom','bandit','mercs','military','ecologist','monolith','clear-sky','sin']
 
 export function ContactsTab() {
-  const { contacts, selectedContactId, selectContact, openCompose } = usePda()
+  const { contacts, selectedContactId, selectContact, openCompose, setMapFocus, setTab } = usePda()
   const [filter, setFilter] = useState<'all' | Faction>('all')
   const list = filter === 'all' ? contacts : contacts.filter(c => c.faction === filter)
   const selected = contacts.find(c => c.id === selectedContactId) ?? list[0]
@@ -90,7 +90,11 @@ export function ContactsTab() {
               <button className="btn-tac" disabled={!selected.online} onClick={() => openCompose(selected.id)}>
                 Send message
               </button>
-              <button className="btn-tac" disabled={!selected.position} onClick={() => usePda.getState().setTab('map')}>
+              <button className="btn-tac" disabled={!selected.position}
+                onClick={() => {
+                  if (selected.position) setMapFocus({ position: selected.position, zoom: 16 })
+                  setTab('map')
+                }}>
                 Show on map
               </button>
             </div>

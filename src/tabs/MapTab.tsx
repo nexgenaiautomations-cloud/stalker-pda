@@ -46,6 +46,19 @@ function Recenter({ pos }: { pos: LatLng }) {
   return null
 }
 
+function FocusEffect() {
+  const map = useMap()
+  const focus = usePda(s => s.mapFocus)
+  const setFocus = usePda(s => s.setMapFocus)
+  useEffect(() => {
+    if (focus) {
+      map.flyTo([focus.position.lat, focus.position.lng], focus.zoom ?? 16, { duration: 0.85 })
+      setFocus(null)
+    }
+  }, [focus, map, setFocus])
+  return null
+}
+
 function MapClickCatcher({ onPlace }: { onPlace: (ll: LatLng) => void }) {
   useMapEvents({
     click(e) {
@@ -230,6 +243,7 @@ export function MapTab() {
             attribution="&copy; OpenStreetMap"
           />
           <Recenter pos={player.position} />
+          <FocusEffect />
           {placeMode && <MapClickCatcher onPlace={handleMapClick} />}
           <LongPressHandler onLongPress={handleLongPress} onProgress={setPressPx} />
 

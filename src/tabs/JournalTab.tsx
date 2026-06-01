@@ -5,7 +5,7 @@ import { IconPlus, IconTrash, IconStar } from '../components/Icons'
 const TYPES: JournalEntry['type'][] = ['note', 'log', 'rumor', 'discovery']
 
 export function JournalTab() {
-  const { journal, addJournal, updateJournal, deleteJournal, player, setTab } = usePda()
+  const { journal, addJournal, updateJournal, deleteJournal, player, setTab, setMapFocus } = usePda()
   const [filter, setFilter] = useState<'all' | JournalEntry['type']>('all')
   const list = filter === 'all' ? journal : journal.filter(j => j.type === filter)
   const [selectedId, setSelectedId] = useState<string | null>(journal[0]?.id ?? null)
@@ -123,7 +123,10 @@ export function JournalTab() {
                     N {selected.location.lat.toFixed(4)} · E {selected.location.lng.toFixed(4)}
                   </div>
                 </div>
-                <button className="btn-tac" onClick={() => setTab('map')}>Show on map</button>
+                <button className="btn-tac" onClick={() => {
+                  if (selected.location) setMapFocus({ position: selected.location, zoom: 16 })
+                  setTab('map')
+                }}>Show on map</button>
               </div>
             )}
           </div>

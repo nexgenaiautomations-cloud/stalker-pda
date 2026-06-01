@@ -192,6 +192,7 @@ body {
 .fac-monolith { color: #ffd56b; }
 .fac-ecologist { color: #ffe26b; }
 .fac-clear-sky { color: #79d3e8; }
+.fac-sin { color: #c84a3a; }
 
 /* Leaflet — make it feel like an Anomaly PDA map */
 .leaflet-container {

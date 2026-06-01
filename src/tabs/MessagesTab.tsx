@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { usePda, factionClass, factionLabel } from '../store/pda'
 import { IconSend } from '../components/Icons'
 import { sendToPda } from '../net/pdaNetwork'
+import { getNpcReplyForInput } from '../data/personalities'
 
 function fmtClock(ts: number) {
   const d = new Date(ts)
@@ -56,19 +57,12 @@ export function MessagesTab() {
     if (isRemote) {
       sendToPda(activeId, { kind: 'msg', from: pdaId, callsign: player.callsign, faction: player.faction, text: text.trim() })
     } else {
-      // simulated NPC auto-reply
+      // NPC auto-reply with per-contact personality
       const c = contacts.find(x => x.id === activeId)
       if (c) {
+        const userText = text.trim()
         setTimeout(() => {
-          const replies = [
-            'Copy that, stalker.',
-            'Roger. Watch your back.',
-            'I\'ll mark it on my PDA.',
-            'Acknowledged. Out.',
-            'Understood. Sending coordinates.',
-            'Get to me when you can.'
-          ]
-          addMessage({ from: c.id, to: 'self', text: replies[Math.floor(Math.random() * replies.length)] })
+          addMessage({ from: c.id, to: 'self', text: getNpcReplyForInput(c.id, userText) })
         }, 900 + Math.random() * 1200)
       }
     }

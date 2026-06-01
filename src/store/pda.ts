@@ -5,7 +5,7 @@ export type Tab = 'map' | 'tasks' | 'contacts' | 'messages' | 'journal' | 'radio
 
 export type Faction =
   | 'loner' | 'duty' | 'freedom' | 'bandit' | 'mercs'
-  | 'military' | 'monolith' | 'ecologist' | 'clear-sky'
+  | 'military' | 'monolith' | 'ecologist' | 'clear-sky' | 'sin'
 
 export type Rank = 'rookie' | 'experienced' | 'veteran' | 'master' | 'legend'
 
@@ -123,6 +123,7 @@ export interface PdaState {
   mapFilters: Record<string, boolean>
   composeTo: string | null
   knownPdas: Record<string, { callsign: string; faction: Faction; lastSeen: number }>
+  mapFocus: { position: LatLng; zoom?: number } | null
   // actions
   setTab: (t: Tab) => void
   setBooted: (b: boolean) => void
@@ -143,6 +144,8 @@ export interface PdaState {
   addCustomMarker: (m: Omit<MapMarker, 'id' | 'custom' | 'createdAt'>) => string
   updateCustomMarker: (id: string, patch: Partial<MapMarker>) => void
   deleteCustomMarker: (id: string) => void
+  updatePlayer: (patch: Partial<PlayerState>) => void
+  setMapFocus: (f: { position: LatLng; zoom?: number } | null) => void
 }
 
 const SEED_CENTER: LatLng = { lat: 43.8260, lng: -111.7897 } // Rexburg, ID
@@ -205,8 +208,6 @@ const seedMarkers: MapMarker[] = [
   { id: 'a2', kind: 'anomaly', anomaly: 'whirligig', label: 'Whirligig field', position: { lat: 43.8262, lng: -111.8092 } },
   { id: 'a3', kind: 'anomaly', anomaly: 'burner', label: 'Burner', position: { lat: 43.8371, lng: -111.7966 } },
   { id: 'a4', kind: 'anomaly', anomaly: 'springboard', label: 'Springboard', position: { lat: 43.8414, lng: -111.8016 } },
-  { id: 's1', kind: 'stash', label: 'Stash — dead bandit', position: { lat: 43.8208, lng: -111.7948 }, detail: 'Coords from PDA decrypt' },
-  { id: 's2', kind: 'stash', label: 'Stash — broken truck', position: { lat: 43.8185, lng: -111.7952 }, detail: 'Snitch tip' },
   { id: 'c1', kind: 'camp', label: 'Rookie Camp', position: { lat: 43.8181, lng: -111.7991 } },
   { id: 'c2', kind: 'camp', label: '100 Rad Bar', position: { lat: 43.8382, lng: -111.8166 } },
   { id: 'c3', kind: 'camp', label: 'Yantar — Ecologist Bunker', position: { lat: 43.8414, lng: -111.8016 } },
@@ -220,7 +221,7 @@ const seedStations: RadioStation[] = [
   { id: 'r1', freq: '88.7', name: 'Zone Broadcast', description: 'Anonymous shortwave. Distorted reports from the deep Zone.' },
   { id: 'r2', freq: '94.2', name: 'Loner Net', faction: 'loner', description: 'Rookie traffic — job listings, warnings, gossip.' },
   { id: 'r3', freq: '99.5', name: 'Duty Command', faction: 'duty', description: 'Encrypted Duty channel — partial decryption.' },
-  { id: 'r4', freq: '101.3', name: 'Freedom Pirate', faction: 'freedom', description: 'Anti-establishment broadcast. Heavy guitar.' },
+  { id: 'r4', freq: '101.3', name: 'Open Frequency', faction: 'freedom', description: 'Anti-establishment broadcast. Heavy guitar.' },
   { id: 'r5', freq: '105.1', name: 'Ecologist Telemetry', faction: 'ecologist', description: 'Beeps. Steady carrier with data bursts.' },
   { id: 'r6', freq: '108.0', name: 'Monolith Choir', faction: 'monolith', description: 'Layered chanting. Avoid prolonged listening.' }
 ]
@@ -267,10 +268,11 @@ export const usePda = create<PdaState>()(
       mapFilters: {
         anomaly: true, stash: true, camp: true, trader: true,
         hot: true, extraction: true, person: true, poi: true,
-        task: true, contacts: true, journal: false
+        task: true, journal: false
       },
       composeTo: null,
       knownPdas: {},
+      mapFocus: null,
 
       setTab: (t) => set({ tab: t }),
       setBooted: (b) => set({ booted: b }),
@@ -321,11 +323,13 @@ export const usePda = create<PdaState>()(
       }),
       deleteCustomMarker: (id) => set({
         customMarkers: get().customMarkers.filter(m => m.id !== id)
-      })
+      }),
+      updatePlayer: (patch) => set({ player: { ...get().player, ...patch } }),
+      setMapFocus: (f) => set({ mapFocus: f })
     }),
     {
       name: 'stalker-pda',
-      version: 3,
+      version: 4,
       partialize: (s) => ({
         pdaId: s.pdaId,
         player: s.player,
@@ -344,13 +348,13 @@ export const usePda = create<PdaState>()(
 export const factionLabel: Record<Faction, string> = {
   loner: 'Loners', duty: 'Duty', freedom: 'Freedom', bandit: 'Bandits',
   mercs: 'Mercenaries', military: 'Military', monolith: 'Monolith',
-  ecologist: 'Ecologists', 'clear-sky': 'Clear Sky'
+  ecologist: 'Ecologists', 'clear-sky': 'Clear Sky', sin: 'Sin'
 }
 
 export const factionClass: Record<Faction, string> = {
   loner: 'fac-loner', duty: 'fac-duty', freedom: 'fac-freedom', bandit: 'fac-bandit',
   mercs: 'fac-mercs', military: 'fac-military', monolith: 'fac-monolith',
-  ecologist: 'fac-ecologist', 'clear-sky': 'fac-clear-sky'
+  ecologist: 'fac-ecologist', 'clear-sky': 'fac-clear-sky', sin: 'fac-sin'
 }
 
 export const rankLabel: Record<Rank, string> = {

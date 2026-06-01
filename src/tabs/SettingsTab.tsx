@@ -1,12 +1,18 @@
 import { useEffect, useState } from 'react'
-import { usePda } from '../store/pda'
+import { usePda, Faction, Rank, factionLabel, rankLabel } from '../store/pda'
 import { canInstall, isInstalled, onInstallChange, triggerInstall } from '../pwa/install'
+
+const FACTIONS: Faction[] = [
+  'loner', 'duty', 'freedom', 'bandit', 'mercs',
+  'military', 'monolith', 'ecologist', 'clear-sky', 'sin'
+]
+const RANKS: Rank[] = ['rookie', 'experienced', 'veteran', 'master', 'legend']
 
 const LIVE_URL = 'https://stalker-pda.vercel.app'
 const GH_URL = 'https://github.com/nexgenaiautomations-cloud/stalker-pda'
 
 export function SettingsTab() {
-  const { pdaId, player, knownPdas } = usePda()
+  const { pdaId, player, knownPdas, updatePlayer } = usePda()
   const [installable, setInstallable] = useState(canInstall())
   const [installed, setInstalled] = useState(isInstalled())
   const [copied, setCopied] = useState<string | null>(null)
@@ -86,7 +92,62 @@ export function SettingsTab() {
           </div>
         </section>
 
-        {/* Identity */}
+        {/* Operator profile editor */}
+        <section>
+          <div className="text-[10px] tracking-[0.2em] text-pda-muted mb-2">OPERATOR PROFILE</div>
+          <div className="panel-sunken p-4 space-y-3">
+            <Field label="Callsign">
+              <input value={player.callsign} className="w-full text-sm"
+                     onChange={e => updatePlayer({ callsign: e.target.value })} />
+            </Field>
+
+            <div className="grid grid-cols-2 gap-3">
+              <Field label="Faction">
+                <select value={player.faction} className="w-full text-sm"
+                        onChange={e => updatePlayer({ faction: e.target.value as Faction })}>
+                  {FACTIONS.map(f => (
+                    <option key={f} value={f}>{factionLabel[f]}</option>
+                  ))}
+                </select>
+              </Field>
+              <Field label="Rank">
+                <select value={player.rank} className="w-full text-sm"
+                        onChange={e => updatePlayer({ rank: e.target.value as Rank })}>
+                  {RANKS.map(r => (
+                    <option key={r} value={r}>{rankLabel[r]}</option>
+                  ))}
+                </select>
+              </Field>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <Field label="Reputation">
+                <input type="number" value={player.reputation} className="w-full text-sm"
+                       onChange={e => updatePlayer({ reputation: Number(e.target.value) || 0 })} />
+              </Field>
+              <Field label="Funds (RU)">
+                <input type="number" value={player.rubles} className="w-full text-sm"
+                       onChange={e => updatePlayer({ rubles: Math.max(0, Number(e.target.value) || 0) })} />
+              </Field>
+            </div>
+
+            <Field label="Zone label">
+              <input value={player.zoneName} className="w-full text-sm"
+                     onChange={e => updatePlayer({ zoneName: e.target.value })} />
+            </Field>
+
+            <Field label="Experience (0–1000)">
+              <input type="number" value={Math.max(0, Math.min(1000, player.reputation + 500))}
+                     className="w-full text-sm"
+                     onChange={e => {
+                       const xp = Math.max(0, Math.min(1000, Number(e.target.value) || 0))
+                       updatePlayer({ reputation: xp - 500 })
+                     }} />
+            </Field>
+          </div>
+        </section>
+
+        {/* Identity readout */}
         <section>
           <div className="text-[10px] tracking-[0.2em] text-pda-muted mb-2">DEVICE</div>
           <div className="panel-sunken p-4 text-xs space-y-1.5">
@@ -128,6 +189,15 @@ function Row({ k, v }: { k: string; v: string }) {
       <span className="text-pda-muted uppercase tracking-widest text-[10px]">{k}</span>
       <span className="text-pda-text break-all text-right">{v}</span>
     </div>
+  )
+}
+
+function Field({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <label className="block">
+      <span className="block text-[10px] tracking-widest text-pda-muted mb-1 uppercase">{label}</span>
+      {children}
+    </label>
   )
 }
 

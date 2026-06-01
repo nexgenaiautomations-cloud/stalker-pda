@@ -2,7 +2,10 @@ import { usePda, factionClass, factionLabel } from '../store/pda'
 import { IconPin, IconCheck, IconStar } from '../components/Icons'
 
 export function TasksTab() {
-  const { tasks, contacts, selectedTaskId, selectTask, trackTask, completeTask, setTab } = usePda()
+  const {
+    tasks, contacts, selectedTaskId, selectTask, trackTask, completeTask,
+    setTab, setMapFocus
+  } = usePda()
   const selected = tasks.find(t => t.id === selectedTaskId) ?? tasks[0]
   const giver = selected ? contacts.find(c => c.id === selected.giver) : null
 
@@ -80,7 +83,12 @@ export function TasksTab() {
                 <IconStar size={14} />
                 {selected.tracked ? 'Untrack' : 'Track'}
               </button>
-              <button className="btn-tac flex items-center gap-2" onClick={() => setTab('map')}>
+              <button className="btn-tac flex items-center gap-2"
+                disabled={!selected.target}
+                onClick={() => {
+                  if (selected.target) setMapFocus({ position: selected.target, zoom: 16 })
+                  setTab('map')
+                }}>
                 <IconPin size={14} />
                 Show on map
               </button>
