@@ -1,7 +1,7 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
-export type Tab = 'map' | 'tasks' | 'contacts' | 'messages' | 'journal' | 'radio' | 'stats'
+export type Tab = 'map' | 'tasks' | 'contacts' | 'messages' | 'journal' | 'radio' | 'stats' | 'settings'
 
 export type Faction =
   | 'loner' | 'duty' | 'freedom' | 'bandit' | 'mercs'

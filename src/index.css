@@ -5,13 +5,19 @@
 :root { color-scheme: dark; }
 
 html, body, #root {
-  height: 100%;
+  height: 100vh;
+  height: 100dvh;
   margin: 0;
   background: #000;
   overflow: hidden;
   -webkit-user-select: none;
   user-select: none;
   touch-action: manipulation;
+}
+
+/* Mobile tweak: tighter type & padding inside PDA */
+@media (max-width: 640px) {
+  body { font-size: 13px; }
 }
 
 body {

@@ -11,6 +11,7 @@ import { MessagesTab } from './tabs/MessagesTab'
 import { JournalTab } from './tabs/JournalTab'
 import { RadioTab } from './tabs/RadioTab'
 import { StatsTab } from './tabs/StatsTab'
+import { SettingsTab } from './tabs/SettingsTab'
 import { usePdaNetwork } from './net/pdaNetwork'
 
 export default function App() {
@@ -30,20 +31,20 @@ export default function App() {
   }, [booted])
 
   return (
-    <div className="w-screen h-screen flex items-center justify-center bg-black p-2 sm:p-6">
+    <div className="w-screen h-[100vh] h-[100dvh] flex items-center justify-center bg-black p-0 sm:p-3 lg:p-6">
       {/* Outer device frame */}
       <div className="relative w-full h-full max-w-[1400px] max-h-[900px]
-                      rounded-md bg-pda-frame border border-pda-borderHot/40
-                      shadow-[0_0_60px_rgba(255,160,60,0.08)]">
+                      sm:rounded-md bg-pda-frame sm:border border-pda-borderHot/40
+                      sm:shadow-[0_0_60px_rgba(255,160,60,0.08)]">
         {/* Inner bezel */}
-        <div className="absolute inset-3 rounded-sm border border-pda-border bg-pda-bg overflow-hidden pda-screen scanlines vignette animate-flicker">
+        <div className="absolute inset-0 sm:inset-3 sm:rounded-sm sm:border border-pda-border bg-pda-bg overflow-hidden pda-screen scanlines vignette animate-flicker">
           {!booted && <BootScreen />}
           {booted && (
             <div className="flex flex-col h-full">
               <StatusBar />
               <div className="flex flex-1 overflow-hidden">
                 <SideBar />
-                <main className="flex-1 overflow-hidden flex flex-col relative">
+                <main className="flex-1 overflow-hidden flex flex-col relative min-w-0">
                   {tab === 'map' && <MapTab />}
                   {tab === 'tasks' && <TasksTab />}
                   {tab === 'contacts' && <ContactsTab />}
@@ -51,17 +52,20 @@ export default function App() {
                   {tab === 'journal' && <JournalTab />}
                   {tab === 'radio' && <RadioTab />}
                   {tab === 'stats' && <StatsTab />}
+                  {tab === 'settings' && <SettingsTab />}
                 </main>
-                <PlayerPanel />
+                <div className="hidden lg:flex">
+                  <PlayerPanel />
+                </div>
               </div>
             </div>
           )}
         </div>
-        {/* Frame screws */}
-        <span className="absolute top-1 left-1 w-2 h-2 rounded-full bg-pda-borderHot/30" />
-        <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-pda-borderHot/30" />
-        <span className="absolute bottom-1 left-1 w-2 h-2 rounded-full bg-pda-borderHot/30" />
-        <span className="absolute bottom-1 right-1 w-2 h-2 rounded-full bg-pda-borderHot/30" />
+        {/* Frame screws — desktop only */}
+        <span className="hidden sm:block absolute top-1 left-1 w-2 h-2 rounded-full bg-pda-borderHot/30" />
+        <span className="hidden sm:block absolute top-1 right-1 w-2 h-2 rounded-full bg-pda-borderHot/30" />
+        <span className="hidden sm:block absolute bottom-1 left-1 w-2 h-2 rounded-full bg-pda-borderHot/30" />
+        <span className="hidden sm:block absolute bottom-1 right-1 w-2 h-2 rounded-full bg-pda-borderHot/30" />
       </div>
     </div>
   )

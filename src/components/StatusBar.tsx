@@ -20,26 +20,26 @@ export function StatusBar() {
   }, [])
 
   return (
-    <div className="h-9 flex items-center px-3 text-xs tracking-widest border-b border-pda-border bg-gradient-to-b from-[#1f1a10] to-[#15110a]">
-      <div className="text-pda-amber amber-glow flex items-center gap-3">
+    <div className="h-8 sm:h-9 flex items-center px-2 sm:px-3 text-[10px] sm:text-xs tracking-widest border-b border-pda-border bg-gradient-to-b from-[#1f1a10] to-[#15110a]">
+      <div className="text-pda-amber amber-glow flex items-center gap-1.5 sm:gap-3 min-w-0">
         <span className="text-pda-amberHot">PDA-3M</span>
-        <span className="text-pda-muted">|</span>
-        <span>{player.callsign}</span>
-        <span className="text-pda-muted">·</span>
-        <span>{rankLabel[player.rank]}</span>
-        <span className="text-pda-muted">·</span>
-        <span>{factionLabel[player.faction]}</span>
+        <span className="text-pda-muted hidden sm:inline">|</span>
+        <span className="truncate max-w-[120px] sm:max-w-none">{player.callsign}</span>
+        <span className="text-pda-muted hidden md:inline">·</span>
+        <span className="hidden md:inline">{rankLabel[player.rank]}</span>
+        <span className="text-pda-muted hidden md:inline">·</span>
+        <span className="hidden md:inline">{factionLabel[player.faction]}</span>
       </div>
-      <div className="flex-1 text-center text-pda-text">
+      <div className="flex-1 text-center text-pda-text hidden md:block">
         <span className="text-pda-muted">ZONE://</span>
         <span className="text-pda-amber amber-glow">{player.zoneName.toUpperCase()}</span>
-        <span className="text-pda-muted ml-3">N {player.position.lat.toFixed(4)}</span>
-        <span className="text-pda-muted ml-2">E {player.position.lng.toFixed(4)}</span>
+        <span className="text-pda-muted ml-3 hidden lg:inline">N {player.position.lat.toFixed(4)}</span>
+        <span className="text-pda-muted ml-2 hidden lg:inline">E {player.position.lng.toFixed(4)}</span>
       </div>
-      <div className="flex items-center gap-3">
-        <span className="text-pda-text">{fmtDate(now)}</span>
+      <div className="flex items-center gap-1.5 sm:gap-3 ml-auto">
+        <span className="text-pda-text hidden sm:inline">{fmtDate(now)}</span>
         <span className="text-pda-amber amber-glow">{fmtTime(now)}</span>
-        <span className="flex items-center gap-1 text-pda-text"><IconSignal size={14} /> 4</span>
+        <span className="flex items-center gap-1 text-pda-text hidden sm:flex"><IconSignal size={14} /> 4</span>
         <span className="flex items-center gap-1 text-pda-text"><IconBattery size={16} /> 84%</span>
       </div>
     </div>
