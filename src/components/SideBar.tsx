@@ -25,7 +25,7 @@ export function SideBar() {
 
   return (
     <aside
-      className="w-[54px] sm:w-[68px] shrink-0 flex flex-col border-r border-pda-border bg-pda-frame overflow-y-auto"
+      className="pda-side shrink-0 flex flex-col border-r border-pda-border bg-pda-frame overflow-y-auto"
     >
       {ITEMS.map(({ id, label, Icon }) => {
         const active = tab === id

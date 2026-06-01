@@ -45,7 +45,7 @@ function FilterToggle({ k, label, color }: { k: string; label: string; color: st
   return (
     <button
       onClick={() => toggle(k)}
-      className={`flex items-center gap-2 px-2 py-1 border text-[10px] tracking-widest uppercase
+      className={`shrink-0 flex items-center gap-2 px-2 py-1 border text-[10px] tracking-widest uppercase
         ${on ? 'border-pda-borderHot text-pda-amberHot bg-pda-panel2'
               : 'border-pda-rule text-pda-dim hover:text-pda-muted'}`}
     >
@@ -164,8 +164,8 @@ export function MapTab() {
         </div>
       </div>
 
-      {/* Filter row */}
-      <div className="border-t border-pda-border px-3 py-2 flex flex-wrap gap-2 bg-pda-panel">
+      {/* Filter row — single line, horizontal scroll on narrow viewports */}
+      <div className="border-t border-pda-border px-3 py-2 flex gap-2 bg-pda-panel overflow-x-auto">
         <FilterToggle k="anomaly" label="Anomalies" color="#ff8a2b" />
         <FilterToggle k="stash" label="Stashes" color="#ffd56b" />
         <FilterToggle k="camp" label="Camps" color="#7ec84a" />

@@ -20,7 +20,7 @@ export function StatusBar() {
   }, [])
 
   return (
-    <div className="h-8 sm:h-9 flex items-center px-2 sm:px-3 text-[10px] sm:text-xs tracking-widest border-b border-pda-border bg-gradient-to-b from-[#1f1a10] to-[#15110a]">
+    <div className="pda-statusbar flex items-center px-2 sm:px-3 text-[10px] sm:text-xs tracking-widest border-b border-pda-border bg-gradient-to-b from-[#1f1a10] to-[#15110a]">
       <div className="text-pda-amber amber-glow flex items-center gap-1.5 sm:gap-3 min-w-0">
         <span className="text-pda-amberHot">PDA-3M</span>
         <span className="text-pda-muted hidden sm:inline">|</span>

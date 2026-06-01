@@ -31,13 +31,9 @@ export default function App() {
   }, [booted])
 
   return (
-    <div className="w-screen h-[100vh] h-[100dvh] flex items-center justify-center bg-black p-0 sm:p-3 lg:p-6">
-      {/* Outer device frame */}
-      <div className="relative w-full h-full max-w-[1400px] max-h-[900px]
-                      sm:rounded-md bg-pda-frame sm:border border-pda-borderHot/40
-                      sm:shadow-[0_0_60px_rgba(255,160,60,0.08)]">
-        {/* Inner bezel */}
-        <div className="absolute inset-0 sm:inset-3 sm:rounded-sm sm:border border-pda-border bg-pda-bg overflow-hidden pda-screen scanlines vignette animate-flicker">
+    <div className="pda-viewport">
+      <div className="pda-frame">
+        <div className="pda-bezel pda-screen scanlines vignette animate-flicker bg-pda-bg">
           {!booted && <BootScreen />}
           {booted && (
             <div className="flex flex-col h-full">
@@ -61,11 +57,10 @@ export default function App() {
             </div>
           )}
         </div>
-        {/* Frame screws — desktop only */}
-        <span className="hidden sm:block absolute top-1 left-1 w-2 h-2 rounded-full bg-pda-borderHot/30" />
-        <span className="hidden sm:block absolute top-1 right-1 w-2 h-2 rounded-full bg-pda-borderHot/30" />
-        <span className="hidden sm:block absolute bottom-1 left-1 w-2 h-2 rounded-full bg-pda-borderHot/30" />
-        <span className="hidden sm:block absolute bottom-1 right-1 w-2 h-2 rounded-full bg-pda-borderHot/30" />
+        <span className="pda-screw" style={{ top: 4, left: 4 }} />
+        <span className="pda-screw" style={{ top: 4, right: 4 }} />
+        <span className="pda-screw" style={{ bottom: 4, left: 4 }} />
+        <span className="pda-screw" style={{ bottom: 4, right: 4 }} />
       </div>
     </div>
   )
