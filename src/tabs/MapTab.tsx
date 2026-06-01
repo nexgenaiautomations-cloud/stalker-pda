@@ -55,6 +55,77 @@ function MapClickCatcher({ onPlace }: { onPlace: (ll: LatLng) => void }) {
   return null
 }
 
+interface LongPressProps {
+  onLongPress: (ll: LatLng) => void
+  onProgress?: (px: { x: number; y: number } | null) => void
+  durationMs?: number
+  moveTolerance?: number
+}
+
+function LongPressHandler({
+  onLongPress, onProgress, durationMs = 500, moveTolerance = 12
+}: LongPressProps) {
+  const map = useMap()
+  useEffect(() => {
+    let timer: ReturnType<typeof setTimeout> | null = null
+    let startX = 0, startY = 0
+    let startLatLng: LatLng | null = null
+
+    const getXY = (oe: any) => {
+      if (oe?.touches?.[0]) return { x: oe.touches[0].clientX, y: oe.touches[0].clientY }
+      if (oe?.changedTouches?.[0]) return { x: oe.changedTouches[0].clientX, y: oe.changedTouches[0].clientY }
+      return { x: oe?.clientX ?? 0, y: oe?.clientY ?? 0 }
+    }
+
+    const cancel = () => {
+      if (timer) { clearTimeout(timer); timer = null }
+      startLatLng = null
+      onProgress?.(null)
+    }
+
+    const onDown = (e: any) => {
+      cancel()
+      const { x, y } = getXY(e.originalEvent)
+      startX = x; startY = y
+      startLatLng = { lat: e.latlng.lat, lng: e.latlng.lng }
+      // local coords relative to map container
+      const rect = (map.getContainer() as HTMLElement).getBoundingClientRect()
+      onProgress?.({ x: x - rect.left, y: y - rect.top })
+      timer = setTimeout(() => {
+        if (startLatLng) {
+          try { (navigator as any).vibrate?.(20) } catch { /* ignore */ }
+          onLongPress(startLatLng)
+        }
+        cancel()
+      }, durationMs)
+    }
+
+    const onMove = (e: any) => {
+      if (!timer) return
+      const { x, y } = getXY(e.originalEvent)
+      if (Math.hypot(x - startX, y - startY) > moveTolerance) cancel()
+    }
+
+    map.on('mousedown', onDown)
+    map.on('mousemove', onMove)
+    map.on('mouseup', cancel)
+    map.on('dragstart', cancel)
+    map.on('zoomstart', cancel)
+    map.on('movestart', cancel)
+
+    return () => {
+      cancel()
+      map.off('mousedown', onDown)
+      map.off('mousemove', onMove)
+      map.off('mouseup', cancel)
+      map.off('dragstart', cancel)
+      map.off('zoomstart', cancel)
+      map.off('movestart', cancel)
+    }
+  }, [map, onLongPress, onProgress, durationMs, moveTolerance])
+  return null
+}
+
 function FilterToggle({ k, label, color }: { k: string; label: string; color: string }) {
   const on = usePda(s => s.mapFilters[k])
   const toggle = usePda(s => s.toggleMapFilter)
@@ -87,6 +158,7 @@ export function MapTab() {
 
   const [placeMode, setPlaceMode] = useState(false)
   const [draft, setDraft] = useState<Draft | null>(null)
+  const [pressPx, setPressPx] = useState<{ x: number; y: number } | null>(null)
 
   const playerIcon = useMemo(() => divIcon(
     `<div class="pda-marker" style="color:#ffb13b">
@@ -105,6 +177,13 @@ export function MapTab() {
     if (!placeMode) return
     setDraft({ kind: 'stash', label: '', detail: '', position: ll })
     setPlaceMode(false)
+  }
+
+  const handleLongPress = (ll: LatLng) => {
+    if (draft) return  // already editing
+    setDraft({ kind: 'stash', label: '', detail: '', position: ll })
+    setPlaceMode(false)
+    setPressPx(null)
   }
 
   const editExisting = (m: MapMarker) => {
@@ -152,6 +231,7 @@ export function MapTab() {
           />
           <Recenter pos={player.position} />
           {placeMode && <MapClickCatcher onPlace={handleMapClick} />}
+          <LongPressHandler onLongPress={handleLongPress} onProgress={setPressPx} />
 
           {/* Player */}
           <Marker position={[player.position.lat, player.position.lng]} icon={playerIcon}>
@@ -254,6 +334,22 @@ export function MapTab() {
           >
             <IconPlus size={14} /> Add Pin
           </button>
+        )}
+
+        {/* Long-press hint (auto-fades after a few seconds via CSS via key) */}
+        {!placeMode && !draft && customMarkers.length === 0 && (
+          <div className="absolute bottom-2 left-1/2 -translate-x-1/2 z-[500] text-[10px] tracking-widest uppercase text-pda-amber bg-pda-panel/85 border border-pda-rule px-2 py-1 pointer-events-none">
+            Long-press map to drop pin
+          </div>
+        )}
+
+        {/* Long-press progress ring at the touch point */}
+        {pressPx && (
+          <span
+            key={`${pressPx.x},${pressPx.y}`}
+            className="long-press-ring"
+            style={{ left: pressPx.x, top: pressPx.y }}
+          />
         )}
 
         {/* Pin count */}

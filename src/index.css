@@ -92,6 +92,32 @@ body {
   font-family: 'Share Tech Mono', Consolas, ui-monospace, monospace;
   color: #d9c9a4;
   background: #050403;
+  -webkit-touch-callout: none;
+}
+
+/* Suppress iOS long-press callouts inside the map so our long-press
+   handler fires cleanly. */
+.leaflet-container {
+  -webkit-touch-callout: none;
+}
+
+/* Long-press indicator overlay */
+.long-press-ring {
+  position: absolute;
+  width: 56px; height: 56px;
+  border-radius: 50%;
+  border: 2px solid #ffb13b;
+  box-shadow: 0 0 14px rgba(255,160,60,0.6), inset 0 0 14px rgba(255,160,60,0.3);
+  transform: translate(-50%, -50%) scale(0.4);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 600;
+  animation: lpRing 520ms ease-out forwards;
+}
+@keyframes lpRing {
+  0%   { transform: translate(-50%, -50%) scale(0.4); opacity: 0; }
+  20%  { opacity: 1; }
+  100% { transform: translate(-50%, -50%) scale(1.4); opacity: 0; }
 }
 
 /* PDA screen — warm dark with subtle amber backlight (Anomaly style) */
