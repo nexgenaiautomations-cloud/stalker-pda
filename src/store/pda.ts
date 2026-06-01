@@ -59,13 +59,19 @@ export interface JournalEntry {
   location?: LatLng | null
 }
 
+export type MarkerKind =
+  | 'anomaly' | 'stash' | 'camp' | 'trader' | 'hot' | 'extraction'
+  | 'person'  | 'poi'
+
 export interface MapMarker {
   id: string
-  kind: 'anomaly' | 'stash' | 'camp' | 'trader' | 'hot' | 'extraction'
+  kind: MarkerKind
   label: string
   position: LatLng
   detail?: string
   anomaly?: Anomaly
+  custom?: boolean       // user-created (editable/deletable)
+  createdAt?: number
 }
 
 export interface RadioStation {
@@ -107,6 +113,7 @@ export interface PdaState {
   messages: PdaMessage[]
   journal: JournalEntry[]
   markers: MapMarker[]
+  customMarkers: MapMarker[]
   stations: RadioStation[]
   // ui
   selectedTaskId: string | null
@@ -133,6 +140,9 @@ export interface PdaState {
   toggleMapFilter: (k: string) => void
   setPlayerPos: (p: LatLng, heading?: number) => void
   registerPda: (id: string, info: { callsign: string; faction: Faction }) => void
+  addCustomMarker: (m: Omit<MapMarker, 'id' | 'custom' | 'createdAt'>) => string
+  updateCustomMarker: (id: string, patch: Partial<MapMarker>) => void
+  deleteCustomMarker: (id: string) => void
 }
 
 const SEED_CENTER: LatLng = { lat: 43.8260, lng: -111.7897 } // Rexburg, ID
@@ -248,6 +258,7 @@ export const usePda = create<PdaState>()(
       messages: seedMessages,
       journal: seedJournal,
       markers: seedMarkers,
+      customMarkers: [],
       stations: seedStations,
       selectedTaskId: 't1',
       selectedContactId: null,
@@ -255,7 +266,8 @@ export const usePda = create<PdaState>()(
       activeStationId: null,
       mapFilters: {
         anomaly: true, stash: true, camp: true, trader: true,
-        hot: true, extraction: true, task: true, contacts: true, journal: false
+        hot: true, extraction: true, person: true, poi: true,
+        task: true, contacts: true, journal: false
       },
       composeTo: null,
       knownPdas: {},
@@ -297,11 +309,23 @@ export const usePda = create<PdaState>()(
       }),
       registerPda: (id, info) => set({
         knownPdas: { ...get().knownPdas, [id]: { ...info, lastSeen: Date.now() } }
+      }),
+      addCustomMarker: (m) => {
+        const id = newId()
+        const marker: MapMarker = { ...m, id, custom: true, createdAt: Date.now() }
+        set({ customMarkers: [...get().customMarkers, marker] })
+        return id
+      },
+      updateCustomMarker: (id, patch) => set({
+        customMarkers: get().customMarkers.map(m => m.id === id ? { ...m, ...patch } : m)
+      }),
+      deleteCustomMarker: (id) => set({
+        customMarkers: get().customMarkers.filter(m => m.id !== id)
       })
     }),
     {
       name: 'stalker-pda',
-      version: 2,
+      version: 3,
       partialize: (s) => ({
         pdaId: s.pdaId,
         player: s.player,
@@ -310,7 +334,8 @@ export const usePda = create<PdaState>()(
         journal: s.journal,
         mapFilters: s.mapFilters,
         activeStationId: s.activeStationId,
-        knownPdas: s.knownPdas
+        knownPdas: s.knownPdas,
+        customMarkers: s.customMarkers
       })
     }
   )
