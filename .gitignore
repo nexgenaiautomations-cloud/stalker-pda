@@ -1,0 +1,19 @@
+node_modules
+dist
+dist-ssr
+.vite
+*.local
+
+# Editors
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+
+# Vercel
+.vercel
+
+# Env
+.env
+.env.*
+!.env.example
